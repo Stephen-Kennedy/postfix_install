@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # Author: Stephen J Kennedy
-# Version: 1.1
-# Script to setup Postfix on Ubuntu with Gmail SMTP relay and environmental variable management.
+# Version: 1.2
+# Script to setup Postfix on Ubuntu with Gmail SMTP relay and enhanced environmental variable management.
 
 import os
 import subprocess
@@ -45,14 +45,15 @@ def run_command(command, sudo=False):
 def create_env_file():
     """Prompt user for environmental variables and create the env file."""
     print("\nCreating environment variables file...")
-    gmail_user = input("Enter your Gmail address: ").strip()
-    gmail_password = getpass.getpass("Enter your Gmail App Password: ").strip()
+    from_email = input("Enter the sender's email address (FROM_EMAIL): ").strip()
+    to_email = input("Enter the recipient's email address (TO_EMAIL): ").strip()
+    smtp_server = input("Enter the SMTP server (default: smtp.gmail.com): ").strip() or "smtp.gmail.com"
 
     try:
         with open(ENV_FILE, "w") as env_file:
-            env_file.write(f"FROM_EMAIL={gmail_user}\n")
-            env_file.write(f"TO_EMAIL={gmail_user}\n")
-            env_file.write("SMTP_SERVER=smtp.gmail.com\n")
+            env_file.write(f"FROM_EMAIL={from_email}\n")
+            env_file.write(f"TO_EMAIL={to_email}\n")
+            env_file.write(f"SMTP_SERVER={smtp_server}\n")
         run_command(["chmod", "600", ENV_FILE], sudo=True)
         print(f"Environment file created successfully at {ENV_FILE}")
     except Exception as e:
