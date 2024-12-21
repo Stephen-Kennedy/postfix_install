@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 # Author: Stephen J Kennedy
-# Version: 1.3
+# Version: 1.4
 # Script to setup Postfix on Ubuntu with Gmail SMTP relay and enhanced environmental variable management.
 
 import os
@@ -145,7 +145,7 @@ smtp_tls_CAfile = /etc/ssl/certs/ca-certificates.crt
         print(f"\nERROR: Failed to write Gmail authentication file: {e}")
         exit(1)
 
-    run_command(["mv", "/tmp/sasl_passwd", "/etc/postfix/sasl_passwd"], sudo=True)
+    run_command(["mv", "/tmp/sasl_passwd", "/etc/postfix/sasl_passwd"])
     run_command(["chmod", "600", "/etc/postfix/sasl_passwd"], sudo=True)
     run_command(["postmap", "/etc/postfix/sasl_passwd"], sudo=True)
 
