@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 # Author: Stephen J Kennedy
-# Version: 1.2
+# Version: 1.3
 # Script to setup Postfix on Ubuntu with Gmail SMTP relay and enhanced environmental variable management.
 
 import os
@@ -42,18 +42,33 @@ def run_command(command, sudo=False):
         print(f"\nERROR: Command not found: {' '.join(command)}")
         exit(1)
 
+def ensure_directory_exists(path):
+    """Ensure the directory for the given path exists."""
+    directory = os.path.dirname(path)
+    if not os.path.exists(directory):
+        try:
+            os.makedirs(directory, exist_ok=True)
+            print(f"Created directory: {directory}")
+        except Exception as e:
+            print(f"\nERROR: Failed to create directory {directory}: {e}")
+            exit(1)
+
 def create_env_file():
     """Prompt user for environmental variables and create the env file."""
     print("\nCreating environment variables file...")
     from_email = input("Enter the sender's email address (FROM_EMAIL): ").strip()
     to_email = input("Enter the recipient's email address (TO_EMAIL): ").strip()
     smtp_server = input("Enter the SMTP server (default: smtp.gmail.com): ").strip() or "smtp.gmail.com"
+    gmail_password = getpass.getpass("Enter your Gmail App Password: ").strip()
+
+    ensure_directory_exists(ENV_FILE)
 
     try:
         with open(ENV_FILE, "w") as env_file:
             env_file.write(f"FROM_EMAIL={from_email}\n")
             env_file.write(f"TO_EMAIL={to_email}\n")
             env_file.write(f"SMTP_SERVER={smtp_server}\n")
+            env_file.write(f"EMAIL_PASSWORD={gmail_password}\n")
         run_command(["chmod", "600", ENV_FILE], sudo=True)
         print(f"Environment file created successfully at {ENV_FILE}")
     except Exception as e:
@@ -124,7 +139,7 @@ smtp_tls_CAfile = /etc/ssl/certs/ca-certificates.crt
         with open("/tmp/sasl_passwd", "w") as f:
             with open(ENV_FILE) as env_file:
                 env_vars = dict(line.strip().split("=", 1) for line in env_file if "=" in line)
-                f.write(f"[smtp.gmail.com]:587 {env_vars['FROM_EMAIL']}:{env_vars['TO_EMAIL']}\n")
+                f.write(f"[{env_vars['SMTP_SERVER']}]:587 {env_vars['FROM_EMAIL']}:{env_vars['EMAIL_PASSWORD']}\n")
         print("Gmail authentication file created successfully.")
     except Exception as e:
         print(f"\nERROR: Failed to write Gmail authentication file: {e}")
